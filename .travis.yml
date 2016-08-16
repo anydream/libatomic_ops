@@ -5,14 +5,21 @@ os:
   - osx
 
 compiler:
-  - clang
   - gcc
 
-sudo: false
+sudo: required
+
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install libc6:i386
 
 install:
   - ./autogen.sh
-  - ./configure --enable-werror
 
 script:
-  - make -j check
+  - ./configure
+  - cd tests && make list_atomic.c && cd ..
+  - gcc -m32 -I src -O0 -S tests/list_atomic.c
+  - cat list_atomic.s
+  - gcc -m32 -Wall -Wextra -I src -O3 -march=native tests/test_stack.c src/*.c
+  - ./a.out
